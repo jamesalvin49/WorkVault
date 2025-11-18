@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  resources   Resource[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Resource {
+  id            String   @id @default(cuid())
+  name          String
+  url           String
+  type          ResourceType
+  description   String?
+  icon          String?
+  tags          String? // JSON array of tags
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id])
+  isFavorite    Boolean  @default(false)
+  accessCount   Int      @default(0)
+  lastAccessed  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Contact {
+  id              String   @id @default(cuid())
+  fullName        String
+  mobileNumber    String?
+  officeExtension String?
+  email           String?
+  department      String?
+  notes           String?
+  profilePicture  String?
+  tags            String? // JSON array of tags
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum ResourceType {
+  URL
+  FOLDER
+}
